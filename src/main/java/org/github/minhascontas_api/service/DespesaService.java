@@ -1,4 +1,4 @@
-package org.github.minhascontas_api.service.exceptions;
+package org.github.minhascontas_api.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -7,8 +7,8 @@ import org.github.minhascontas_api.domain.dto.*;
 import org.github.minhascontas_api.domain.Usuario;
 import org.github.minhascontas_api.repository.UsuarioRepository;
 import org.github.minhascontas_api.repository.DespesaRepository;
-import org.github.minhascontas_api.validation.UpdateStrategy;
-import org.github.minhascontas_api.validation.ValidationStrategy;
+import org.github.minhascontas_api.service.exceptions.DespesaNaoEncontradaException;
+import org.github.minhascontas_api.service.exceptions.UsuarioNaoEncontradoException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +21,11 @@ public class DespesaService {
     public static final String USUARIO_NÃO_ENCONTRADO = "Usuario não encontrado";
     private final DespesaRepository despesaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final List<ValidationStrategy> validationStrategies;
-    private final List<UpdateStrategy> updateStrategies;
+    private final ValidationService validationService;
 
     @Transactional
     public Long cadastrar(DadosCadastroDespesa dados) {
+        validationService.validar(dados);
         var despesa = despesaRepository.save(new Despesa(dados));
         return despesa.getId();
     }
@@ -39,14 +39,12 @@ public class DespesaService {
     }
 
     @Transactional
-    public void atualizar(Long id, AtualizacaoDespesa dados) {
+    public void atualizar(Long id, DadosAtualizacaoDespesa dados) {
+
+        validationService.validar(dados);
 
         var despesa = despesaRepository.findById(id).orElseThrow(()
                 -> new DespesaNaoEncontradaException(DESPESA_NÃO_ENCONTRADA));
-
-        validationStrategies.forEach(strategy -> strategy.validate(dados));
-
-        updateStrategies.forEach(strategy -> strategy.update(despesa, dados));
 
         despesaRepository.save(despesa);
     }

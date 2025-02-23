@@ -5,7 +5,7 @@ import org.github.minhascontas_api.domain.Categoria;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record AtualizacaoDespesa(
+public record DadosAtualizacaoDespesa(
         Long id,
         String descricao,
         BigDecimal valor,
